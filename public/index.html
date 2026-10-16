@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CPQ Simulator</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <h1>CPQ Simulator</h1>
+      <p>Creates a password-protected HubSpot landing page per quote (expires in 30 days).</p>
+    </header>
+
+    <main class="layout">
+      <section class="card">
+        <h2>New quote</h2>
+        <form id="quote-form" novalidate>
+          <div class="grid">
+            <label>Quote number <input name="quoteNumber" placeholder="auto"></label>
+            <label>Currency <input name="currency" value="USD" maxlength="3"></label>
+            <label>Customer name <input name="customerName" required></label>
+            <label>Company <input name="company" required></label>
+          </div>
+
+          <h3>Line items</h3>
+          <table class="items">
+            <thead><tr><th>Description</th><th>Qty</th><th>Unit price</th><th>Line total</th><th></th></tr></thead>
+            <tbody id="items"></tbody>
+          </table>
+          <button type="button" id="add-item" class="secondary">+ Add line item</button>
+
+          <label>Notes <textarea name="notes" rows="2"></textarea></label>
+
+          <div class="form-footer">
+            <strong>Total: <span id="total">0.00</span></strong>
+            <button type="submit" id="submit">Submit quote</button>
+          </div>
+          <p id="form-status" class="status" role="status"></p>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2>Quotes</h2>
+        <p id="empty" class="muted">No quotes yet.</p>
+        <ul id="quotes" class="quotes"></ul>
+      </section>
+    </main>
+
+    <template id="item-row">
+      <tr>
+        <td><input name="description" required></td>
+        <td><input name="quantity" type="number" min="1" step="1" value="1" required></td>
+        <td><input name="unitPrice" type="number" min="0" step="0.01" value="0" required></td>
+        <td class="line-total">0.00</td>
+        <td><button type="button" class="remove" aria-label="Remove line item">×</button></td>
+      </tr>
+    </template>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

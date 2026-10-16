@@ -1,0 +1,21 @@
+<!--
+  templateType: page
+  isAvailableForNewContent: true
+  label: CPQ Quote
+-->
+<!doctype html>
+<html lang="{{ html_lang }}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ content.html_title }}</title>
+    <meta name="robots" content="noindex, nofollow">
+    {{ standard_header_includes }}
+  </head>
+  <body>
+    <main class="cpq-page">
+      {% module "quote_details" path="../modules/quote-details" label="Quote details" %}
+    </main>
+    {{ standard_footer_includes }}
+  </body>
+</html>
