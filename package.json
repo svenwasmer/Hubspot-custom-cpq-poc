@@ -1,0 +1,13 @@
+{
+  "name": "hs-cms-cli-tests",
+  "version": "0.1.0",
+  "private": true,
+  "description": "POC: CPQ simulator that creates password-protected, expiring HubSpot landing pages per quote via the Pages API",
+  "type": "module",
+  "engines": { "node": ">=20.6" },
+  "scripts": {
+    "start": "node --env-file=.env server/index.js",
+    "test": "node --test",
+    "upload-template": "hs cms upload hubspot/cpq-poc cpq-poc"
+  }
+}
