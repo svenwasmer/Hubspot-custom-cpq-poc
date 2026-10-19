@@ -1,3 +1,9 @@
+{#
+  Renders one quote. Field values come from the page's widgets.quote_details.body,
+  set by the backend when the page is created (see fields.json for the field list).
+  Line totals are calculated here; the grand total is passed in by the backend.
+  If quote text can come from untrusted sources, add the |escape filter to text fields.
+#}
 <section class="cpq-quote">
   <header class="cpq-quote__header">
     <p class="cpq-quote__eyebrow">Quote {{ module.quote_number }}</p>
