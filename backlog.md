@@ -12,4 +12,4 @@
 - [x] CPQ POC: vanilla JS SPA to create quotes, show URL/password, delete pages
 - [x] CPQ POC: unit tests (`npm test`)
 - [x] CPQ POC: README with setup/run steps
-- [x] CPQ POC: real round-trip against my-demo-account (create, publish, password, expiry, delete verified)
+- [x] CPQ POC: real round-trip against a HubSpot test account (create, publish, password, expiry, delete verified)

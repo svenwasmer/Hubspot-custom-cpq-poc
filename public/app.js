@@ -1,3 +1,13 @@
+/**
+ * CPQ simulator SPA (vanilla JS, no build step).
+ *
+ * Stands in for the real CPQ system: collects quote data, sends it to the
+ * local backend (/api/quotes), and lists created quotes with their landing
+ * page URL, password and a delete button. All HubSpot calls happen on the
+ * backend; this file only talks to /api/quotes.
+ *
+ * Totals shown here are a preview; the backend recalculates the real total.
+ */
 const form = document.getElementById('quote-form');
 const itemsBody = document.getElementById('items');
 const rowTemplate = document.getElementById('item-row');
@@ -9,6 +19,7 @@ const emptyEl = document.getElementById('empty');
 
 const money = (n) => n.toFixed(2);
 
+// Appends a line item row (cloned from <template id="item-row">), optionally pre-filled.
 function addItem(values = {}) {
   const row = rowTemplate.content.firstElementChild.cloneNode(true);
   for (const [name, value] of Object.entries(values)) row.querySelector(`[name="${name}"]`).value = value;
@@ -44,6 +55,8 @@ function setStatus(message, isError = false) {
   statusEl.classList.toggle('error', isError);
 }
 
+// Calls the local backend. On failure, throws with the backend's error message
+// plus HubSpot's error details, if any, so they appear in the UI.
 async function api(method, path, body) {
   const res = await fetch(path, {
     method,
@@ -58,12 +71,14 @@ async function api(method, path, body) {
   return data;
 }
 
+// Tiny DOM helper. Text is set via textContent, so quote data is never parsed as HTML.
 function el(tag, props = {}, ...children) {
   const node = Object.assign(document.createElement(tag), props);
   node.append(...children);
   return node;
 }
 
+// Renders the quote list: URL, password (with copy), expiry, Open and Delete.
 function renderQuotes(quotes) {
   emptyEl.hidden = quotes.length > 0;
   quotesEl.replaceChildren(...quotes.map((q) => {

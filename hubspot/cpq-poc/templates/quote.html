@@ -3,6 +3,14 @@
   isAvailableForNewContent: true
   label: CPQ Quote
 -->
+{#
+  Coded landing page template for CPQ quote pages.
+  - The annotation above must stay first in the file. `templateType: page` covers
+    both website and landing pages (`landing_page` is not a valid value).
+  - The module name "quote_details" is the key the backend fills via the Pages
+    API `widgets` field (server/quote.js -> buildPagePayload). Rename both together.
+  - noindex keeps quote pages out of search engines.
+#}
 <!doctype html>
 <html lang="{{ html_lang }}">
   <head>

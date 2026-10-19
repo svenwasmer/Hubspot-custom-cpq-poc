@@ -1,3 +1,17 @@
+/**
+ * Local HTTP server for the CPQ simulator.
+ *
+ * - Serves the SPA from `public/`.
+ * - Exposes a small JSON API that the SPA calls:
+ *     GET    /api/quotes      list stored quotes (newest first)
+ *     POST   /api/quotes      create a quote + its HubSpot landing page
+ *     DELETE /api/quotes/:id  delete the landing page and the quote record
+ *
+ * The browser never talks to HubSpot directly: the access token stays on the
+ * server, and api.hubapi.com doesn't allow browser (CORS) calls anyway.
+ *
+ * Run with `npm start` (loads `.env`). Binds to 127.0.0.1 only.
+ */
 import { createServer } from 'node:http';
 import { randomUUID } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
@@ -31,6 +45,7 @@ async function readJson(req) {
   }
 }
 
+// Serves files from public/; refuses any path that resolves outside it.
 async function serveStatic(req, res) {
   const urlPath = new URL(req.url, 'http://localhost').pathname;
   const filePath = normalize(join(PUBLIC_DIR, urlPath === '/' ? 'index.html' : urlPath));
@@ -44,7 +59,23 @@ async function serveStatic(req, res) {
   }
 }
 
+/**
+ * Builds the request handler. Dependencies are injected so tests can swap in
+ * a fake HubSpot client and a temporary store.
+ *
+ * @param {object} deps
+ * @param {ReturnType<import('./hubspot.js').createHubSpotClient>} deps.client
+ * @param {ReturnType<import('./store.js').createStore>} deps.store
+ * @param {object} deps.config
+ * @param {string} deps.config.templatePath Design Manager path of the quote template.
+ * @param {string} deps.config.domain       Landing page domain ('' = account default).
+ * @param {string} deps.config.redirectUrl  Where expired pages redirect.
+ * @param {number} deps.config.expiryDays   Days until a quote page expires.
+ * @param {() => Date} [deps.now]           Clock, injectable for tests.
+ * @returns {(req: import('node:http').IncomingMessage, res: import('node:http').ServerResponse) => Promise<void>}
+ */
 export function createApp({ client, store, config, now = () => new Date() }) {
+  // POST /api/quotes: validate -> create draft page -> publish -> save record.
   async function createQuote(req, res) {
     const quote = normalizeQuote(await readJson(req));
     const createdAt = now();
@@ -80,6 +111,7 @@ export function createApp({ client, store, config, now = () => new Date() }) {
     sendJson(res, 201, record);
   }
 
+  // DELETE /api/quotes/:id: delete the HubSpot page, then the local record.
   async function deleteQuote(res, id) {
     const record = await store.get(id);
     if (!record) return sendJson(res, 404, { error: 'Quote not found' });
@@ -104,6 +136,8 @@ export function createApp({ client, store, config, now = () => new Date() }) {
       if (req.method === 'GET') return await serveStatic(req, res);
       sendJson(res, 405, { error: 'Method not allowed' });
     } catch (err) {
+      // Error mapping: bad input -> 400, HubSpot rejected the call -> 502 with
+      // HubSpot's error details (shown in the SPA), anything else -> 500.
       if (err instanceof ValidationError) return sendJson(res, 400, { error: err.message });
       if (err instanceof HubSpotError) {
         console.error(err.message);
@@ -115,6 +149,8 @@ export function createApp({ client, store, config, now = () => new Date() }) {
   };
 }
 
+// Entry point when run directly (npm start). Configuration comes from .env;
+// see .env.example for every variable.
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const config = {
     templatePath: process.env.HUBSPOT_TEMPLATE_PATH || 'cpq-poc/templates/quote.html',
