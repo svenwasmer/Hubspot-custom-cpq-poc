@@ -34,6 +34,12 @@ export class ValidationError extends Error {}
 /**
  * Generates an unguessable page slug, e.g. `quote/1144094057136bd8cfd81a6a725dbd99`.
  * 16 random bytes = 128 bits of entropy, so URLs can't be guessed or enumerated.
+ *
+ * Why not a UUID? `randomBytes` reads from the OS CSPRNG, the same source UUID v4
+ * (`crypto.randomUUID()`) uses, so UUID v4 is no "more random". It has 122 random bits
+ * (6 are fixed for version/variant), i.e. slightly less. UUID v1/v6/v7 embed a
+ * timestamp, which makes them partly predictable and leaks the creation time, so they
+ * must not be used for unguessable URLs.
  * @param {string} [prefix='quote'] URL path segment placed before the random part.
  * @returns {string}
  */
@@ -43,6 +49,8 @@ export function randomSlug(prefix = 'quote') {
 
 /**
  * Generates a random 16-character, URL-safe page password (96 bits of entropy).
+ * Uses the OS CSPRNG like {@link randomSlug}. A UUID is a poor fit here: it has fixed bits,
+ * dashes and a fixed format, and offers no more entropy per character.
  * @returns {string}
  */
 export function randomPassword() {

@@ -247,6 +247,18 @@ All in `server/quote.js`:
 
 To remove password protection, drop the `password` field from `buildPagePayload()`.
 
+#### Why the slug and password aren't UUIDs
+
+Both are generated with Node's `crypto.randomBytes`, which reads from the operating system's cryptographically secure random number generator (CSPRNG). This is the same source that `crypto.randomUUID()` and the `uuid` package's v4 use, so switching to UUIDs would not make the values any more random.
+
+| Option | Random bits | Suitable for an unguessable slug? |
+|---|---|---|
+| Current slug (`randomBytes(16)`, hex) | 128 | Yes |
+| UUID v4 | 122 (6 bits are fixed for version/variant) | Yes, but slightly less entropy |
+| UUID v1 / v6 / v7 | Mostly a timestamp | No. Partly predictable, and leaks the creation time |
+
+Weak randomness is a real concern for `Math.random()`, which is not cryptographically secure. This project doesn't use it. If you need a UUID for another reason (a database `uuid` column, a standard format), `crypto.randomUUID()` is a safe one-line swap in `randomSlug()`. Update the slug test in `test/quote.test.js` to match.
+
 ### Connect your real CPQ system
 
 The SPA in `public/` is only a stand-in. To integrate:
