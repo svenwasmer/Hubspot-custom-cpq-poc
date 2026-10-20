@@ -6,6 +6,7 @@
 
 ## Completed
 
+- [x] CPQ POC: explored UUID v4/v6 for randomness. Kept CSPRNG slug/password (UUID v4 = 122 bits, v6 = timestamp-based and guessable); rationale documented in `server/quote.js` and README
 - [x] CPQ POC: coded landing page template + `quote-details` module, uploaded via `hs cms upload`
 - [x] CPQ POC: local Node backend proxying the Pages API (create + publish, delete)
 - [x] CPQ POC: random slug, random password, 30-day expiry on each quote page
